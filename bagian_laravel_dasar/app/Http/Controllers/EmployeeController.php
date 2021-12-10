@@ -109,6 +109,12 @@ class EmployeeController extends Controller
         return back();
     }
 
+    /**
+     * Listing company untuk ajax select2
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
     public function getListCompany(Request $request)
     {
         $search = $request->query("search");

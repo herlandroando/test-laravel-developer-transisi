@@ -12,7 +12,12 @@ class ImportEmployeeController extends Controller
     {
         return view("employees.import.index");
     }
-
+    /**
+     * Mengimpor file excel ke server
+     *
+     * @param Request $request
+     * @return void
+     */
     public function store(Request $request)
     {
         $request->validate([

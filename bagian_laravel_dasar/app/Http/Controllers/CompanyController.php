@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * Controller business logic of Companies
+ * @author Herlandro T. <herlandrotri@gmail.com>
+ */
 class CompanyController extends Controller
 {
     protected $companyRepository;
@@ -36,8 +40,6 @@ class CompanyController extends Controller
     public function create()
     {
         $data = [];
-        // Session::remove("logo");
-        // dd(Session::get("logo"));
         if (Session::has("logo")) {
             $data["filename"] = Session::get("logo");
             $data["url"] = route("companies.show.temp", ["filename" => $data["filename"]]);
@@ -53,28 +55,33 @@ class CompanyController extends Controller
      */
     public function store(Request $request)
     {
+        //Validasi
         $validated = $request->validate([
             "name" => ["required", "max:255", "string"],
             "email" => ["required", "max:255", "email"],
             "website" => ["required", "max:255", "url"],
         ]);
+        //Jika logo yang disimpan pada temporary tidak ada maka mengembalikan error dan input.
         if (!Session::has("logo")) {
             return back()->withInput($request->only(["name", "email", "website"]))->withErrors(["logo" => "Logo has not been uploaded."]);
         }
+        //Memindahkan file logo dari temporary ke folder Company
         $filename = Session::get("logo");
         list(, $extension) = explode(".", $filename);
         $new_filename = \Illuminate\Support\Str::random(5) . now()->timestamp . ".$extension";
         $validated["path_logo"] = "{$new_filename}";
         $model = $this->companyRepository->create($validated);
         Storage::move("temp/{$filename}", "company/{$new_filename}");
+        //Menghapus session temporary logo
         Session::remove("logo");
+
         return redirect(route('companies.show', ['company' => $model->id]));
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int  $company
      * @return \Illuminate\Http\Response
      */
     public function show($company)
@@ -86,7 +93,7 @@ class CompanyController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  int  $company
      * @return \Illuminate\Http\Response
      */
     public function edit($company)
@@ -99,7 +106,7 @@ class CompanyController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  int  $company
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $company)
@@ -121,23 +128,40 @@ class CompanyController extends Controller
      */
     public function destroy($company)
     {
-        // dd($company);
         $this->companyRepository->deleteById($company);
         return back();
     }
 
-
+    /**
+     * Fungsi upload file logo ke temporary
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
     public function tempUpload(Request $request)
     {
         $base64 = $request->input("logo");
         return response()->json($this->handleFile($base64, "companies.show.temp", true));
     }
+    /**
+     * Fungsi upload pada halaman edit yang mengganti logo secara langsung tanpa ke temporary
+     *
+     * @param Request $request
+     * @param int|string $company
+     * @return \Illuminate\Http\Response
+     */
     public function upload(Request $request, $company)
     {
         $base64 = $request->input("logo");
         return response()->json($this->handleFile($base64, "companies.show.file", false, $company));
     }
 
+    /**
+     * Mengambil file temporary
+     *
+     * @param string $filename
+     * @return void
+     */
     public function getTempFile($filename)
     {
         if (Storage::exists("temp/{$filename}")) {
@@ -147,6 +171,13 @@ class CompanyController extends Controller
         }
     }
 
+    /**
+     * Mengambil file logo di folder company
+     *
+     * @param int|string $company
+     * @param string $filename
+     * @return void
+     */
     public function getFile($company, $filename)
     {
         $this->companyRepository->findById($company);
@@ -157,6 +188,12 @@ class CompanyController extends Controller
         }
     }
 
+    /**
+     * Membuat laporan untuk menlist employees pada company
+     *
+     * @param [type] $company
+     * @return void
+     */
     public function reportEmployee($company)
     {
         $company = $this->companyRepository->findById($company, ["*"], ["employees"]);
@@ -171,6 +208,15 @@ class CompanyController extends Controller
         return PDF::loadView("reports.main")->setPaper('a4', 'landscape')->stream("download.pdf");
     }
 
+    /**
+     * Fungsi untuk menghandle dan memnvalidasi file logo yang berbentuk base64
+     *
+     * @param string $base64
+     * @param string $routename
+     * @param boolean $is_temp
+     * @param int|string $id
+     * @return void
+     */
     private function handleFile($base64, $routename, $is_temp = false, $id = null)
     {
         if (empty($base64)) {

@@ -14,6 +14,12 @@ class ImportCompanyController extends Controller
         return view("companies.import.index");
     }
 
+    /**
+     * Mengimpor file excel ke server
+     *
+     * @param Request $request
+     * @return void
+     */
     public function store(Request $request)
     {
         $request->validate([
