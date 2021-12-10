@@ -1,0 +1,21 @@
+// Fonts
+// @import url('https://fonts.googleapis.com/css?family=Nunito');
+
+// Variables
+@import 'variables';
+
+// Bootstrap
+@import '~bootstrap/scss/bootstrap';
+
+@import "~select2/dist/css/select2.css";
+@import "~bootstrap-icons/font/bootstrap-icons.css";
+@import "~cropperjs/dist/cropper.min.css";
+
+.wrapper {
+    position: relative;
+    // height: 130vh;
+}
+
+@import "/resources/css/template.css";
+@import "/resources/css/companies.css";
+
