@@ -7,3 +7,5 @@ Ini adalah penyelesaian soal dari tes yang diberikan oleh PT Transisi Teknologi 
 Untuk folder bagian-laravel-dasar itu adalah folder project laravel.
 
 Untuk folder file_excel_test adalah file excel 100 data untuk percobaan.
+
+Versi PHP yang digunakan adalah 7.4.
