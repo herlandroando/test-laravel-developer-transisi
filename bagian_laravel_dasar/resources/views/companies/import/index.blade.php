@@ -31,7 +31,7 @@
         @csrf
         <div class="mb-3">
             <label for="file" class="form-label">Import File</label>
-            <input class="form-control" type="file" name="import_file" id="file">
+            <input class="form-control" type="file" accept=".xlsx, .csv" name="import_file" id="file">
             {{-- @error("import_file") --}}
             {{-- <small class="text-danger">{{$message}}</small> --}}
             {{-- @enderror --}}
